@@ -13,11 +13,12 @@ class NavigationPage extends StatefulWidget {
 
 class _NavigationPageState extends State<NavigationPage> {
   int _currentIndex = 0;
+
   final List<Widget> _pages = [
-    const Beranda(), // Beranda
-    const RiwayatPage(), // Riwayat (baru)
-    const Laporkan(), // Laporkan (baru)
-    const PengaturanPage(), // Pengaturan
+    const Beranda(),
+    const RiwayatPage(),
+    const Laporkan(),
+    const PengaturanPage(),
   ];
 
   void _onTabTapped(int index) {
@@ -33,7 +34,21 @@ class _NavigationPageState extends State<NavigationPage> {
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _currentIndex,
         onTap: _onTabTapped,
-        type: BottomNavigationBarType.fixed, // Penting untuk lebih dari 3 item
+        type: BottomNavigationBarType.fixed,
+        backgroundColor: Colors.white, // background flat
+        elevation: 10, // sedikit shadow biar modern
+        selectedItemColor: const Color(0xFF00A795), // hijau aktif
+        unselectedItemColor: Colors.grey[600], // abu-abu modern
+        selectedLabelStyle: const TextStyle(
+          fontFamily: "Rubik",
+          fontWeight: FontWeight.w600,
+          fontSize: 12,
+        ),
+        unselectedLabelStyle: const TextStyle(
+          fontFamily: "Rubik",
+          fontWeight: FontWeight.w400,
+          fontSize: 12,
+        ),
         items: const [
           BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Beranda'),
           BottomNavigationBarItem(icon: Icon(Icons.history), label: 'Riwayat'),

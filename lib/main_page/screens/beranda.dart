@@ -1,24 +1,35 @@
+import 'package:dipoassist/main_page/screens/phrases.dart';
+import 'package:dipoassist/services/auth_service.dart';
 import 'package:flutter/material.dart';
 
-class Beranda extends StatelessWidget {
+class Beranda extends StatefulWidget {
   const Beranda({super.key});
 
   @override
+  State<Beranda> createState() => _BerandaState();
+}
+
+class _BerandaState extends State<Beranda> {
+  late Future<Map<String, dynamic>?> _userFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    _userFuture = AuthService.getUser();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    // Ukuran layar untuk penyesuaian dinamis
     final screenHeight = MediaQuery.of(context).size.height;
 
     return Scaffold(
-      // Kita menggunakan Stack untuk menumpuk widget
-      // 1. Latar belakang hijau di bagian bawah
-      // 2. Konten utama di bagian atas
       body: Stack(
         children: [
-          // Lapisan 1: Latar Belakang Hijau di Atas
+          // Latar belakang hijau
           Container(
-            height: screenHeight * 0.35, // Latar belakang hijau mengisi 35% atas layar
+            height: screenHeight * 0.35,
             decoration: const BoxDecoration(
-              color: Color(0xFF00A795), // Warna hijau toska
+              color: Color(0xFF00A795),
               borderRadius: BorderRadius.only(
                 bottomLeft: Radius.circular(30),
                 bottomRight: Radius.circular(30),
@@ -26,7 +37,6 @@ class Beranda extends StatelessWidget {
             ),
           ),
 
-          // Lapisan 2: Konten Utama yang bisa di-scroll
           SafeArea(
             child: SingleChildScrollView(
               child: Padding(
@@ -35,7 +45,28 @@ class Beranda extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     // --- Header Kustom ---
-                    _buildCustomHeader(),
+                    FutureBuilder<Map<String, dynamic>?>(
+                      future: _userFuture,
+                      builder: (context, snapshot) {
+                        if (snapshot.connectionState ==
+                            ConnectionState.waiting) {
+                          return const Padding(
+                            padding: EdgeInsets.all(16.0),
+                            child: CircularProgressIndicator(
+                              color: Colors.white,
+                            ),
+                          );
+                        }
+
+                        if (!snapshot.hasData) {
+                          return _buildCustomHeader(name: "User");
+                        }
+
+                        final user = snapshot.data!;
+                        final name = user["name"] ?? "User";
+                        return _buildCustomHeader(name: name);
+                      },
+                    ),
                     const SizedBox(height: 20),
 
                     // --- Kartu Prediksi Utama ---
@@ -43,7 +74,7 @@ class Beranda extends StatelessWidget {
                     const SizedBox(height: 30),
 
                     // --- Tombol Aksi Cepat ---
-                    _buildActionButtons(),
+                    _buildActionButtons(context),
                   ],
                 ),
               ),
@@ -54,17 +85,17 @@ class Beranda extends StatelessWidget {
     );
   }
 
-  // Widget untuk header "Selamat Datang" dan ikon pengaturan
-  Widget _buildCustomHeader() {
+  // Header custom (dynamic name)
+  Widget _buildCustomHeader({required String name}) {
     return Padding(
       padding: const EdgeInsets.only(top: 20.0),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          const Column(
+          Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
+              const Text(
                 'Selamat Datang,',
                 style: TextStyle(
                   fontFamily: 'Figtree',
@@ -74,8 +105,8 @@ class Beranda extends StatelessWidget {
                 ),
               ),
               Text(
-                'Nanda!',
-                style: TextStyle(
+                name,
+                style: const TextStyle(
                   fontFamily: 'Figtree',
                   fontSize: 28,
                   fontWeight: FontWeight.bold,
@@ -87,7 +118,7 @@ class Beranda extends StatelessWidget {
           IconButton(
             icon: const Icon(Icons.settings, color: Colors.white, size: 28),
             onPressed: () {
-              // TODO: Tambahkan aksi saat ikon pengaturan ditekan
+              // TODO: Aksi ke halaman pengaturan
             },
           ),
         ],
@@ -95,7 +126,7 @@ class Beranda extends StatelessWidget {
     );
   }
 
-  // Widget untuk kartu besar di tengah
+  // Kartu Prediksi
   Widget _buildPredictionCard() {
     return Card(
       elevation: 8,
@@ -107,8 +138,6 @@ class Beranda extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            // Placeholder untuk grafik sinyal
-            // Ganti Icon ini dengan Image.asset atau package chart seperti fl_chart
             Icon(
               Icons.show_chart_rounded,
               size: 120,
@@ -139,38 +168,41 @@ class Beranda extends StatelessWidget {
     );
   }
 
-  // Widget untuk baris tombol aksi (Riwayat, Laporkan, Pilih)
-  Widget _buildActionButtons() {
+  // Tombol Aksi Cepat
+  Widget _buildActionButtons(BuildContext context) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceAround,
       children: [
         _buildActionButton(
+          context: context,
           icon: Icons.bar_chart_rounded,
           label: 'Riwayat Sinyal',
-          onTap: () {
-            // TODO: Aksi saat tombol Riwayat Sinyal ditekan
-          },
+          onTap: () {},
         ),
         _buildActionButton(
+          context: context,
           icon: Icons.warning_amber_rounded,
           label: 'Laporkan Masalah',
-          onTap: () {
-            // TODO: Aksi saat tombol Laporkan Masalah ditekan
-          },
+          onTap: () {},
         ),
         _buildActionButton(
+          context: context,
           icon: Icons.tune_rounded,
           label: 'Pilih Kata / Frasa',
           onTap: () {
-            // TODO: Aksi saat tombol Pilih ditekan
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const PhrasesScreen()),
+            );
           },
         ),
       ],
     );
   }
 
-  // Widget pembantu yang bisa digunakan kembali untuk membuat setiap tombol aksi
+  // Widget tombol aksi
   Widget _buildActionButton({
+    required BuildContext context,
     required IconData icon,
     required String label,
     required VoidCallback onTap,
