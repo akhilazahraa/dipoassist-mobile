@@ -1,0 +1,64 @@
+name: dipoassist
+description: "A new Flutter project."
+
+publish_to: "none"
+
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.8.1
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  cupertino_icons: ^1.0.8
+  http: ^1.5.0
+  intl: ^0.20.2
+  flutter_secure_storage: ^9.2.2
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+  flutter_lints: ^5.0.0
+
+flutter:
+  uses-material-design: true
+
+  fonts:
+    - family: Figtree
+      fonts:
+        - asset: assets/fonts/Figtree-Regular.ttf
+          weight: 400
+        - asset: assets/fonts/Figtree-Medium.ttf
+          weight: 500
+        - asset: assets/fonts/Figtree-SemiBold.ttf
+          weight: 600
+        - asset: assets/fonts/Figtree-Bold.ttf
+          weight: 700
+        - asset: assets/fonts/Figtree-ExtraBold.ttf
+          weight: 800
+        - asset: assets/fonts/Figtree-Black.ttf
+          weight: 900
+        - asset: assets/fonts/Figtree-Italic.ttf
+          style: italic
+        - asset: assets/fonts/Figtree-MediumItalic.ttf
+          weight: 500
+          style: italic
+        - asset: assets/fonts/Figtree-SemiBoldItalic.ttf
+          weight: 600
+          style: italic
+        - asset: assets/fonts/Figtree-BoldItalic.ttf
+          weight: 700
+          style: italic
+        - asset: assets/fonts/Figtree-ExtraBoldItalic.ttf
+          weight: 800
+          style: italic
+        - asset: assets/fonts/Figtree-BlackItalic.ttf
+          weight: 900
+          style: italic
+
+  assets:
+    - assets/images/logo/
+    - assets/images/landing_page/
