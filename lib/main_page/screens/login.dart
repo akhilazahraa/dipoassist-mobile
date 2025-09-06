@@ -12,96 +12,135 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-  final TextEditingController _emailController = TextEditingController();
-  final TextEditingController _passwordController = TextEditingController();
+  final _emailController = TextEditingController();
+  final _passwordController = TextEditingController();
   final _storage = const FlutterSecureStorage();
   bool _isLoading = false;
-  String? _errorMessage;
 
   Future<void> _login() async {
-    setState(() {
-      _isLoading = true;
-      _errorMessage = null;
-    });
-
-    final url = Uri.parse("http://localhost:5000/api/auth/login");
+    setState(() => _isLoading = true);
 
     try {
       final response = await http.post(
-        url,
+        Uri.parse("http://localhost:5000/api/auth/login"),
         headers: {"Content-Type": "application/json"},
         body: jsonEncode({
-          "email": _emailController.text,
-          "password": _passwordController.text,
+          "email": _emailController.text.trim(),
+          "password": _passwordController.text.trim(),
         }),
       );
 
+      final data = jsonDecode(response.body);
+
       if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
-        final token = data["token"];
+        // simpan token dan id user
+        await _storage.write(key: "auth_token", value: data["token"]);
+        await _storage.write(key: "user_id", value: data["id"]);
 
-        // Simpan token ke storage
-        await _storage.write(key: "auth_token", value: token);
-
-        // Pindah ke halaman utama
         if (mounted) {
           Navigator.pushReplacement(
             context,
-            MaterialPageRoute(builder: (context) => const NavigationPage()),
+            MaterialPageRoute(builder: (_) => const NavigationPage()),
           );
         }
       } else {
-        setState(() {
-          _errorMessage = "Login gagal, periksa email atau password.";
-        });
+        final message = data["meta"]?["message"] ?? "Login gagal";
+        if (mounted) {
+          _showErrorNotif(message);
+        }
       }
     } catch (e) {
-      setState(() {
-        _errorMessage = "Terjadi kesalahan server: $e";
-      });
+      if (mounted) {
+        _showErrorNotif("Terjadi error: $e");
+      }
     } finally {
-      setState(() {
-        _isLoading = false;
-      });
+      setState(() => _isLoading = false);
     }
+  }
+
+  void _showErrorNotif(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message, style: const TextStyle(color: Colors.white)),
+        backgroundColor: Colors.redAccent,
+        behavior: SnackBarBehavior.floating,
+        margin: const EdgeInsets.all(16),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        duration: const Duration(seconds: 3),
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
+    const Color primaryColor = Color(0xFF00A795); // hijau toska
+
     return Scaffold(
       body: Padding(
-        padding: const EdgeInsets.all(24.0),
+        padding: const EdgeInsets.all(24),
         child: Center(
           child: SingleChildScrollView(
             child: Column(
               children: [
+                // Logo di atas tengah
+                Image.asset("assets/images/logo/logo.jpg", height: 100),
+                const SizedBox(height: 20),
                 const Text(
-                  "Login",
-                  style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
+                  "Masuk",
+                  style: TextStyle(
+                    fontSize: 28,
+                    fontWeight: FontWeight.bold,
+                    color: primaryColor, // warna hijau toska
+                  ),
+                ),
+                const SizedBox(height: 8),
+                const Text(
+                  "Silakan masukkan email dan password Anda",
+                  style: TextStyle(color: Colors.black54, fontSize: 14),
+                  textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 20),
                 TextField(
                   controller: _emailController,
-                  decoration: const InputDecoration(labelText: "Email"),
+                  decoration: InputDecoration(
+                    labelText: "Email",
+                    prefixIcon: const Icon(Icons.email_outlined),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
                 ),
-                const SizedBox(height: 10),
+                const SizedBox(height: 16),
                 TextField(
                   controller: _passwordController,
                   obscureText: true,
-                  decoration: const InputDecoration(labelText: "Password"),
-                ),
-                const SizedBox(height: 20),
-                if (_errorMessage != null)
-                  Text(
-                    _errorMessage!,
-                    style: const TextStyle(color: Colors.red),
+                  decoration: InputDecoration(
+                    labelText: "Password",
+                    prefixIcon: const Icon(Icons.lock_outline),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
                   ),
-                const SizedBox(height: 20),
+                ),
+                const SizedBox(height: 24),
                 _isLoading
                     ? const CircularProgressIndicator()
-                    : ElevatedButton(
-                        onPressed: _login,
-                        child: const Text("Login"),
+                    : SizedBox(
+                        width: double.infinity,
+                        child: ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: primaryColor,
+                            padding: const EdgeInsets.symmetric(vertical: 14),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                          onPressed: _login,
+                          child: const Text(
+                            "Login",
+                            style: TextStyle(fontSize: 16, color: Colors.white),
+                          ),
+                        ),
                       ),
               ],
             ),

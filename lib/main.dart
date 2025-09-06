@@ -13,9 +13,7 @@ class dipoassist extends StatelessWidget {
     return MaterialApp(
       title: 'dipoassist',
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: const Color.fromARGB(255, 4, 195, 10),
-        ),
+        colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF00A795)),
         useMaterial3: true,
       ),
       home: AuthCheck(),
